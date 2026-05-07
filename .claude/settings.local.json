@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c \"import openpyxl; print\\('ok'\\)\")",
+      "Bash(python -m pip install openpyxl -q)",
+      "Bash(python -c ' *)",
+      "Read(//tmp/**)"
+    ]
+  }
+}
