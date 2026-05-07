@@ -118,7 +118,7 @@ body{font-family:'Roboto',sans-serif;background:#E8EBF5;color:var(--txt);min-hei
 .tbl tr:last-child td{border-bottom:none}
 .tbl tr:hover td{background:var(--gy)}
 .num{font-family:'Roboto Mono',monospace;font-weight:600;font-size:.76rem}
-.scroll-t{overflow-y:auto;max-height:380px}
+.scroll-t{overflow-y:auto;overflow-x:auto;max-height:380px}
 .scroll-t::-webkit-scrollbar{width:3px}
 .scroll-t::-webkit-scrollbar-thumb{background:var(--az2);border-radius:3px}
 
@@ -277,6 +277,103 @@ footer{text-align:center;font-family:'Roboto Mono',monospace;font-size:.58rem;
 .ppto-detail-table td{padding:.45rem .65rem;border-bottom:1px solid var(--gy2);vertical-align:middle}
 .ppto-detail-table tr:last-child td{border-bottom:none}
 .ppto-detail-table tr:hover td{background:var(--gy)}
+
+/* ══════════════════════════════════════════════
+   RESPONSIVE — TABLET ≤ 768px
+══════════════════════════════════════════════ */
+@media(max-width:768px){
+  /* Topbar: nav scrollable */
+  .topbar{flex-wrap:wrap;padding:.45rem .85rem;gap:.35rem;row-gap:.4rem}
+  .tl{flex:0 0 auto}
+  .tnav{order:3;width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;
+    padding-bottom:.2rem;gap:.2rem}
+  .tnav::-webkit-scrollbar{height:2px}
+  .tnav::-webkit-scrollbar-thumb{background:rgba(255,255,255,.3);border-radius:2px}
+  .nb{white-space:nowrap}
+  /* Grids */
+  .g5{grid-template-columns:repeat(3,1fr)}
+  .g4{grid-template-columns:repeat(2,1fr)}
+  .g6040,.g4060{grid-template-columns:1fr}
+  /* Horizon KPIs */
+  .hz-kpis{grid-template-columns:repeat(3,1fr)}
+  /* Semaforo */
+  .sem-grid{grid-template-columns:repeat(3,1fr)}
+  .sem-cell:nth-child(3){border-right:none}
+  .sem-cell:nth-child(4),.sem-cell:nth-child(5),.sem-cell:nth-child(6){border-top:1px solid var(--brd)}
+  /* Tabs scroll */
+  .tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;flex-wrap:nowrap}
+  .tabs::-webkit-scrollbar{height:2px}
+  .tab-btn{white-space:nowrap}
+}
+
+/* ══════════════════════════════════════════════
+   RESPONSIVE — MÓVIL ≤ 480px
+══════════════════════════════════════════════ */
+@media(max-width:480px){
+  /* Body base */
+  body{font-size:13px}
+  /* Topbar */
+  .topbar{padding:.4rem .65rem}
+  .tname{font-size:.78rem}
+  .tdate{display:none}
+  /* Wrap */
+  .wrap{padding:.65rem .65rem 3.5rem}
+  /* Section head */
+  .sh h2{font-size:.8rem}
+  .sh-tag{display:none}
+  /* Grids */
+  .g5{grid-template-columns:repeat(2,1fr);gap:.5rem}
+  .g4{grid-template-columns:repeat(2,1fr);gap:.5rem}
+  .g3,.g2,.g6040,.g4060{grid-template-columns:1fr;gap:.55rem}
+  /* KPI */
+  .kpi{padding:.7rem .75rem .65rem}
+  .kpi-val{font-size:1.5rem}
+  .kpi-lbl{font-size:.58rem}
+  .kpi-sub{font-size:.58rem}
+  /* Cards */
+  .ch{padding:.55rem .75rem}
+  .cb{padding:.7rem .75rem}
+  .ct{font-size:.72rem}
+  /* Tables: horizontal scroll */
+  .scroll-t{overflow-x:auto;max-height:300px}
+  .scroll-t table{min-width:560px}
+  .ppto-detail-table{min-width:420px}
+  .card > .cb{overflow-x:auto}
+  .tbl{font-size:.65rem}
+  .tbl th,.tbl td{padding:.38rem .5rem}
+  .num{font-size:.68rem}
+  /* Controls */
+  .ctrl{padding:.5rem .65rem;gap:.45rem}
+  .search-inp{font-size:.65rem}
+  /* Horizon KPIs */
+  .hz-kpis{grid-template-columns:repeat(2,1fr);gap:.4rem}
+  .hzkv{font-size:1.1rem}
+  /* Semaforo */
+  .sem-grid{grid-template-columns:repeat(2,1fr)}
+  .sem-cell{border-right:none;border-bottom:1px solid var(--brd);padding:.6rem .5rem}
+  .sem-n{font-size:1.25rem}
+  /* Sumstrip */
+  .sumstrip{gap:.8rem;padding:.6rem .85rem}
+  .ss-v{font-size:1.1rem}
+  /* Horizon box */
+  .hz-box{padding:.75rem .85rem}
+  .hz-presets{gap:.18rem}
+  .hbtn{font-size:.56rem;padding:.18rem .45rem}
+  /* Tabs */
+  .tab-btn{font-size:.6rem;padding:.35rem .65rem .3rem}
+  /* Donut */
+  .donut-cw{width:120px;height:120px}
+  .donut-n{font-size:1.5rem}
+  /* Type legend */
+  .type-legend{gap:.4rem}
+  .tleg{font-size:.58rem}
+  /* Override inline grids generados por JS (mes-cards, presupuesto) */
+  #mes-cards div[style*="repeat(4"]{grid-template-columns:repeat(2,1fr)!important}
+  /* Vision general cards inline */
+  div[style*="grid-template-columns:repeat(4,1fr)"].vg-grid{grid-template-columns:repeat(2,1fr)!important}
+  /* PDF button */
+  button[onclick="showPdfDialog()"]{font-size:.55rem;padding:.22rem .65rem}
+}
 </style>
 </head>
 <body>
