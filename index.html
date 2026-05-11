@@ -6,6 +6,7 @@
 <title>TECSERVICE · Panel Contratos 2026</title>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&family=Roboto+Condensed:wght@400;700;900&family=Roboto+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
 :root{
   --az1:#002D73; --az2:#33448D; --az3:#0E2D55; --az4:#D4D5FC;
@@ -307,6 +308,10 @@ footer{text-align:center;font-family:'Roboto Mono',monospace;font-size:.58rem;
   font-weight:700;padding:.2rem .55rem;border-radius:20px;cursor:pointer;
   transition:all .13s;text-transform:uppercase;letter-spacing:.05em}
 .btn-logout:hover{background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.5)}
+.lg-link{background:none;border:none;color:var(--az2);font-size:.7rem;cursor:pointer;
+  margin-top:.8rem;text-decoration:underline;padding:0}
+.lg-timer{font-size:.65rem;color:var(--gy3);margin-top:.6rem}
+.lg-btn:disabled{opacity:.55;cursor:not-allowed}
 
 /* ═══════════════ RESPONSIVE MOBILE ═══════════════ */
 @media(max-width:767px){
@@ -389,11 +394,26 @@ footer{text-align:center;font-family:'Roboto Mono',monospace;font-size:.58rem;
   <div class="lg-box">
     <div class="lg-logo">TECSERVICE</div>
     <div class="lg-title">Panel de Contratos 2026</div>
-    <div class="lg-sub">Ingresa tu correo corporativo para acceder</div>
-    <input type="email" id="lg-email" class="lg-inp" placeholder="correo@empresa.cl"
-           onkeydown="if(event.key==='Enter')doLogin()">
-    <button class="lg-btn" onclick="doLogin()">Ingresar</button>
-    <div class="lg-err" id="lg-err"></div>
+
+    <div id="lg-step1">
+      <div class="lg-sub">Ingresa tu correo corporativo para recibir tu código de acceso</div>
+      <input type="email" id="lg-email" class="lg-inp" placeholder="correo@empresa.cl"
+             onkeydown="if(event.key==='Enter')sendOtp()">
+      <button class="lg-btn" id="lg-send-btn" onclick="sendOtp()">Enviar código</button>
+      <div class="lg-err" id="lg-err"></div>
+    </div>
+
+    <div id="lg-step2" style="display:none">
+      <div class="lg-sub">Ingresa el código de 6 dígitos enviado a<br><strong id="lg-email-shown"></strong></div>
+      <input type="text" id="lg-otp" class="lg-inp" placeholder="000000" maxlength="6"
+             style="text-align:center;font-size:1.4rem;letter-spacing:.4rem"
+             onkeydown="if(event.key==='Enter')verifyOtp()">
+      <button class="lg-btn" id="lg-verify-btn" onclick="verifyOtp()">Verificar</button>
+      <div class="lg-err" id="lg-err2"></div>
+      <div><button class="lg-link" onclick="backToEmail()">← Cambiar correo</button></div>
+      <div class="lg-timer" id="lg-timer"></div>
+    </div>
+
     <div class="lg-footer">Acceso restringido · Solo usuarios autorizados</div>
   </div>
 </div>
@@ -3063,32 +3083,85 @@ function renderFcVsPpto(){
 
 
 
-// ─── Auth ──────────────────────────────────────────────────────────────────
-const ALLOWED = new Set([
+// ─── Auth OTP ──────────────────────────────────────────────────────────────
+emailjs.init('mUdCW_6gSRGS0A6fN');
+const EJS_SVC='service_35l3vus', EJS_TPL='template_ut5xtwb';
+const ALLOWED=new Set([
   'marcelo.ruminot@gemco.cl','alexis.flores@tecservice.cl',
   'marcelo.ruminot@tecservice.cl','alexis.flores@gemco.cl',
   'cristian.valenzuela@aspencapital.cl','ignacio.cargioli@aspencapital.cl',
   'cristobal.munoz@aspencapital.cl','rafael.vergara@gemco.cl',
   'rafael.vergara@aspencapital.cl'
 ]);
+let _otp=null,_otpEmail=null,_otpExpiry=null,_otpTimer=null;
+
 function checkAuth(){
   const u=localStorage.getItem('cvg_user');
-  if(u && ALLOWED.has(u)){
-    document.getElementById('login-screen').style.display='none';
-  }
+  if(u && ALLOWED.has(u)) document.getElementById('login-screen').style.display='none';
 }
-function doLogin(){
+
+async function sendOtp(){
   const em=(document.getElementById('lg-email').value||'').trim().toLowerCase();
-  if(ALLOWED.has(em)){
-    localStorage.setItem('cvg_user',em);
-    document.getElementById('login-screen').style.display='none';
-    document.getElementById('lg-err').textContent='';
-  } else {
-    document.getElementById('lg-err').textContent='Correo no autorizado. Contacta al administrador.';
+  const errEl=document.getElementById('lg-err');
+  if(!em){errEl.textContent='Ingresa tu correo.';return;}
+  if(!ALLOWED.has(em)){errEl.textContent='Correo no autorizado. Contacta al administrador.';return;}
+  const btn=document.getElementById('lg-send-btn');
+  btn.disabled=true; btn.textContent='Enviando...'; errEl.textContent='';
+  _otp=String(Math.floor(100000+Math.random()*900000));
+  _otpEmail=em; _otpExpiry=Date.now()+10*60*1000;
+  try{
+    await emailjs.send(EJS_SVC,EJS_TPL,{to_email:em,otp:_otp});
+    document.getElementById('lg-step1').style.display='none';
+    document.getElementById('lg-step2').style.display='block';
+    document.getElementById('lg-email-shown').textContent=em;
+    document.getElementById('lg-otp').focus();
+    startOtpTimer();
+  }catch(e){
+    errEl.textContent='Error al enviar el correo. Intenta nuevamente.';
+    btn.disabled=false; btn.textContent='Enviar código'; _otp=null;
   }
 }
+
+function verifyOtp(){
+  const entered=(document.getElementById('lg-otp').value||'').trim();
+  const errEl=document.getElementById('lg-err2');
+  if(!entered){errEl.textContent='Ingresa el código.';return;}
+  if(Date.now()>_otpExpiry){errEl.textContent='El código expiró. Solicita uno nuevo.';_otp=null;return;}
+  if(entered!==_otp){errEl.textContent='Código incorrecto. Intenta nuevamente.';return;}
+  _otp=null; clearInterval(_otpTimer);
+  localStorage.setItem('cvg_user',_otpEmail);
+  document.getElementById('login-screen').style.display='none';
+}
+
+function backToEmail(){
+  _otp=null; clearInterval(_otpTimer);
+  document.getElementById('lg-step2').style.display='none';
+  document.getElementById('lg-step1').style.display='block';
+  const btn=document.getElementById('lg-send-btn');
+  btn.disabled=false; btn.textContent='Enviar código';
+  document.getElementById('lg-err2').textContent='';
+  document.getElementById('lg-otp').value='';
+}
+
+function startOtpTimer(){
+  const el=document.getElementById('lg-timer');
+  _otpTimer=setInterval(()=>{
+    const rem=Math.max(0,_otpExpiry-Date.now());
+    const m=Math.floor(rem/60000), s=Math.floor((rem%60000)/1000);
+    el.textContent='Código válido por '+m+':'+(s<10?'0':'')+s;
+    if(rem===0){clearInterval(_otpTimer);el.textContent='Código expirado.';}
+  },1000);
+}
+
 function doLogout(){
   localStorage.removeItem('cvg_user');
+  _otp=null; clearInterval(_otpTimer);
+  document.getElementById('lg-step1').style.display='block';
+  document.getElementById('lg-step2').style.display='none';
+  document.getElementById('lg-send-btn').disabled=false;
+  document.getElementById('lg-send-btn').textContent='Enviar código';
+  document.getElementById('lg-err').textContent='';
+  document.getElementById('lg-otp').value='';
   document.getElementById('login-screen').style.display='flex';
 }
 checkAuth();
